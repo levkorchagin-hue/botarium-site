@@ -357,10 +357,9 @@
 
     <script>
         // ============================================================
-        //  БОТАРИУМ — ОТПРАВКА ЗАЯВОК ЧЕРЕЗ BOTGATE
+        //  БОТАРИУМ — ОТПРАВКА ЗАЯВОК ЧЕРЕЗ BOTGATE (ПРАВИЛЬНЫЙ URL)
         // ============================================================
 
-        // Ждём загрузки DOM, чтобы все элементы были доступны
         document.addEventListener('DOMContentLoaded', function() {
 
             const form = document.getElementById('botOrderForm');
@@ -369,8 +368,8 @@
 
             // ---------- НАСТРОЙКИ ----------
 
-            // 🟢 АДРЕС API BOTGATE
-            const PROXY_URL = 'https://bot-gate.ru/';
+            // 🟢 ПРАВИЛЬНЫЙ URL ДЛЯ BOTGATE (без /api/v1/)
+            const PROXY_URL = 'https://bot-gate.ru/bot';
 
             // 🟢 ВАШИ ДАННЫЕ ОТ BOTGATE
             const API_KEY = 'bg_live_6fbdc0c563338d3fcc10983edda56567';  // ← ваш ключ
@@ -384,7 +383,6 @@
 
             // ============================================================
 
-            // ✅ async функция для отправки
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
@@ -421,27 +419,29 @@
                     try {
                         console.log(`📨 Отправка разработчику ${dev.name} (ID: ${dev.chat_id})...`);
 
+                        // 🔹 ПРАВИЛЬНЫЙ ЗАПРОС ДЛЯ BOTGATE
                         const response = await fetch(PROXY_URL, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'X-API-Key': API_KEY  // ← ключ в заголовке
+                            },
                             body: JSON.stringify({
-                                api_key: API_KEY,
                                 bot_id: BOT_ID,
                                 method: 'sendMessage',
-                                params: {
-                                    chat_id: dev.chat_id,
-                                    text: message
-                                }
+                                chat_id: dev.chat_id,
+                                text: message,
+                                parse_mode: 'HTML'
                             })
                         });
 
                         const data = await response.json();
 
-                        if (data.ok) {
+                        if (data.ok || data.success) {
                             successCount++;
                             console.log(`✅ Отправлено разработчику ${dev.name}`);
                         } else {
-                            const errMsg = data.description || data.error || 'неизвестная ошибка';
+                            const errMsg = data.message || data.description || data.error || 'неизвестная ошибка';
                             errors.push(`${dev.name}: ${errMsg}`);
                             console.error(`❌ Ошибка для ${dev.name}:`, data);
                         }
@@ -485,7 +485,7 @@
 
             console.log('✅ Botarium загружен. Жду отправки заявок!');
 
-        }); // Конец DOMContentLoaded
+        });
     </script>
 
 </body>
