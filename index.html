@@ -360,44 +360,47 @@
         //  БОТАРИУМ — ОТПРАВКА ЗАЯВОК ЧЕРЕЗ BOTGATE
         // ============================================================
 
-        const form = document.getElementById('botOrderForm');
-        const btn = document.getElementById('submitBtn');
-        const toast = document.getElementById('toast');
+        // Ждём загрузки DOM, чтобы все элементы были доступны
+        document.addEventListener('DOMContentLoaded', function() {
 
-        // ---------- НАСТРОЙКИ ----------
+            const form = document.getElementById('botOrderForm');
+            const btn = document.getElementById('submitBtn');
+            const toast = document.getElementById('toast');
 
-        // 🟢 АДРЕС API BOTGATE
-        const PROXY_URL = 'https://bot-gate.ru/api/v1/';
+            // ---------- НАСТРОЙКИ ----------
 
-        // 🟢 ВАШИ ДАННЫЕ ОТ BOTGATE (ЗАМЕНИТЕ НА РЕАЛЬНЫЕ)
-        const API_KEY = 'bg_live_6fbd60c563338d3fcc10983edda56567';           // ← из личного кабинета BotGate
-        const BOT_ID = 'bot_PVJ0JAPW7TB6'; // ← из личного кабинета BotGate
+            // 🟢 АДРЕС API BOTGATE
+            const PROXY_URL = 'https://bot-gate.ru/api/v1/';
 
-        // 🟢 ID РАЗРАБОТЧИКОВ
-        const DEVELOPERS = [
-            { name: 'whynoe', chat_id: '6950109518' },
-            { name: 'InvAyeR0', chat_id: '7306396017' }
-        ];
+            // 🟢 ВАШИ ДАННЫЕ ОТ BOTGATE
+            const API_KEY = 'bg_live_6fbdc0c563338d3fcc10983edda56567';  // ← ваш ключ
+            const BOT_ID = 'bot_PVJ0JAPW7TB6'; // ← ЗАМЕНИТЕ НА РЕАЛЬНЫЙ ID
 
-        // ============================================================
+            // 🟢 ID РАЗРАБОТЧИКОВ
+            const DEVELOPERS = [
+                { name: 'whynoe', chat_id: '6950109518' },
+                { name: 'InvAyeR0', chat_id: '7306396017' }
+            ];
 
-        // ✅ ПРАВИЛЬНО: async добавлен к функции-обработчику
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+            // ============================================================
 
-            const name = document.getElementById('clientName').value.trim();
-            const contact = document.getElementById('clientContact').value.trim();
-            const idea = document.getElementById('botIdea').value.trim();
+            // ✅ async функция для отправки
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
 
-            if (!name || !contact || !idea) {
-                showToast('Заполните все поля, пожалуйста.', 'error');
-                return;
-            }
+                const name = document.getElementById('clientName').value.trim();
+                const contact = document.getElementById('clientContact').value.trim();
+                const idea = document.getElementById('botIdea').value.trim();
 
-            btn.disabled = true;
-            btn.classList.add('loading');
+                if (!name || !contact || !idea) {
+                    showToast('Заполните все поля, пожалуйста.', 'error');
+                    return;
+                }
 
-            const message =
+                btn.disabled = true;
+                btn.classList.add('loading');
+
+                const message =
         `🆕 НОВАЯ ЗАЯВКА НА БОТА
 
         👤 Имя: ${name}
@@ -409,78 +412,80 @@
         ⏰ Дата: ${new Date().toLocaleString('ru-RU')}
         `;
 
-            console.log('📤 Отправка заявки через BotGate...');
+                console.log('📤 Отправка заявки через BotGate...');
 
-            let successCount = 0;
-            const errors = [];
+                let successCount = 0;
+                const errors = [];
 
-            for (const dev of DEVELOPERS) {
-                try {
-                    console.log(`📨 Отправка разработчику ${dev.name} (ID: ${dev.chat_id})...`);
+                for (const dev of DEVELOPERS) {
+                    try {
+                        console.log(`📨 Отправка разработчику ${dev.name} (ID: ${dev.chat_id})...`);
 
-                    const response = await fetch(PROXY_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            api_key: API_KEY,
-                            bot_id: BOT_ID,
-                            method: 'sendMessage',
-                            params: {
-                                chat_id: dev.chat_id,
-                                text: message
-                            }
-                        })
-                    });
+                        const response = await fetch(PROXY_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                api_key: API_KEY,
+                                bot_id: BOT_ID,
+                                method: 'sendMessage',
+                                params: {
+                                    chat_id: dev.chat_id,
+                                    text: message
+                                }
+                            })
+                        });
 
-                    const data = await response.json();
+                        const data = await response.json();
 
-                    if (data.ok) {
-                        successCount++;
-                        console.log(`✅ Отправлено разработчику ${dev.name}`);
-                    } else {
-                        const errMsg = data.description || data.error || 'неизвестная ошибка';
-                        errors.push(`${dev.name}: ${errMsg}`);
-                        console.error(`❌ Ошибка для ${dev.name}:`, data);
+                        if (data.ok) {
+                            successCount++;
+                            console.log(`✅ Отправлено разработчику ${dev.name}`);
+                        } else {
+                            const errMsg = data.description || data.error || 'неизвестная ошибка';
+                            errors.push(`${dev.name}: ${errMsg}`);
+                            console.error(`❌ Ошибка для ${dev.name}:`, data);
+                        }
+                    } catch (error) {
+                        errors.push(`${dev.name}: ${error.message || 'ошибка соединения'}`);
+                        console.error(`❌ Сетевая ошибка для ${dev.name}:`, error);
                     }
-                } catch (error) {
-                    errors.push(`${dev.name}: ${error.message || 'ошибка соединения'}`);
-                    console.error(`❌ Сетевая ошибка для ${dev.name}:`, error);
                 }
+
+                console.log(`📊 Результат: ${successCount} из ${DEVELOPERS.length} отправлено`);
+
+                if (successCount === DEVELOPERS.length) {
+                    showToast('✅ Заявка отправлена! Мы свяжемся с вами в ближайшее время.', 'success');
+                    form.reset();
+                } else if (successCount > 0) {
+                    showToast(
+                        `⚠️ Заявка отправлена частично (${successCount} из ${DEVELOPERS.length}). Ошибки: ${errors.join('; ')}`,
+                        'partial'
+                    );
+                } else {
+                    showToast(
+                        `❌ Не удалось отправить заявку. Ошибки: ${errors.join('; ')}. Попробуйте ещё раз.`,
+                        'error'
+                    );
+                }
+
+                btn.disabled = false;
+                btn.classList.remove('loading');
+            });
+
+            // ---------- УВЕДОМЛЕНИЯ ----------
+
+            function showToast(text, type) {
+                toast.textContent = text;
+                toast.className = 'toast ' + type;
+                clearTimeout(toast._timeout);
+                toast._timeout = setTimeout(() => {
+                    toast.className = 'toast';
+                }, 8000);
             }
 
-            console.log(`📊 Результат: ${successCount} из ${DEVELOPERS.length} отправлено`);
+            console.log('✅ Botarium загружен. Жду отправки заявок!');
 
-            if (successCount === DEVELOPERS.length) {
-                showToast('✅ Заявка отправлена! Мы свяжемся с вами в ближайшее время.', 'success');
-                form.reset();
-            } else if (successCount > 0) {
-                showToast(
-                    `⚠️ Заявка отправлена частично (${successCount} из ${DEVELOPERS.length}). Ошибки: ${errors.join('; ')}`,
-                    'partial'
-                );
-            } else {
-                showToast(
-                    `❌ Не удалось отправить заявку. Ошибки: ${errors.join('; ')}. Попробуйте ещё раз.`,
-                    'error'
-                );
-            }
-
-            btn.disabled = false;
-            btn.classList.remove('loading');
-        });
-
-        // ---------- УВЕДОМЛЕНИЯ ----------
-
-        function showToast(text, type) {
-            toast.textContent = text;
-            toast.className = 'toast ' + type;
-            clearTimeout(toast._timeout);
-            toast._timeout = setTimeout(() => {
-                toast.className = 'toast';
-            }, 8000);
-        }
-
-        console.log('✅ Botarium загружен. Жду отправки заявок!');
+        }); // Конец DOMContentLoaded
     </script>
 
 </body>
