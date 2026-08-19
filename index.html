@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Заказать Telegram бота | Botarium</title>
     <style>
-        /* ====== RESET & BASE ====== */
         * {
             margin: 0;
             padding: 0;
@@ -358,33 +357,23 @@
 
     <script>
         // ============================================================
-        //  🔥 БОТАРИУМ — ОТПРАВКА ЗАЯВОК ЧЕРЕЗ ПРОКСИ-СЕРВЕР
+        //  БОТАРИУМ — ОТПРАВКА ЗАЯВОК ЧЕРЕЗ BOTGATE
         // ============================================================
 
         const form = document.getElementById('botOrderForm');
         const btn = document.getElementById('submitBtn');
         const toast = document.getElementById('toast');
 
-        // ---------- НАСТРОЙКИ (ЗАМЕНИТЕ НА СВОИ) ----------
+        // ---------- НАСТРОЙКИ ----------
 
-        // 🟢 АДРЕС ВАШЕГО ПРОКСИ-СЕРВЕРА (после деплоя на Render)
-        // Например: https://botarium-proxy.onrender.com
+        // 🟢 АДРЕС API BOTGATE
         const PROXY_URL = 'https://bot-gate.ru/api/v1/';
-        const response = await fetch(PROXY_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-        api_key: 'bg_live_6fbd60c563338d3fcc10983edda56567', // Ключ из личного кабинета BotGate
-        bot_id: 'bot_PVJ0JAPW7TB6', // ID бота, полученный в BotGate
-        method: 'sendMessage',
-        params: {
-            chat_id: dev.chat_id, // ID разработчика в Telegram
-            text: message
-        }
-    })
-});
 
-        // 🟢 ID РАЗРАБОТЧИКОВ (получить через @userinfobot)
+        // 🟢 ВАШИ ДАННЫЕ ОТ BOTGATE (ЗАМЕНИТЕ НА РЕАЛЬНЫЕ)
+        const API_KEY = 'bg_live_6fbd60c563338d3fcc10983edda56567';           // ← из личного кабинета BotGate
+        const BOT_ID = 'bot_PVJ0JAPW7TB6'; // ← из личного кабинета BotGate
+
+        // 🟢 ID РАЗРАБОТЧИКОВ
         const DEVELOPERS = [
             { name: 'whynoe', chat_id: '6950109518' },
             { name: 'InvAyeR0', chat_id: '7306396017' }
@@ -392,6 +381,7 @@
 
         // ============================================================
 
+        // ✅ ПРАВИЛЬНО: async добавлен к функции-обработчику
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -419,7 +409,7 @@
         ⏰ Дата: ${new Date().toLocaleString('ru-RU')}
         `;
 
-            console.log('📤 Отправка заявки через прокси...');
+            console.log('📤 Отправка заявки через BotGate...');
 
             let successCount = 0;
             const errors = [];
@@ -432,8 +422,13 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            chat_id: dev.chat_id,
-                            text: message
+                            api_key: API_KEY,
+                            bot_id: BOT_ID,
+                            method: 'sendMessage',
+                            params: {
+                                chat_id: dev.chat_id,
+                                text: message
+                            }
                         })
                     });
 
@@ -443,7 +438,7 @@
                         successCount++;
                         console.log(`✅ Отправлено разработчику ${dev.name}`);
                     } else {
-                        const errMsg = data.description || 'неизвестная ошибка';
+                        const errMsg = data.description || data.error || 'неизвестная ошибка';
                         errors.push(`${dev.name}: ${errMsg}`);
                         console.error(`❌ Ошибка для ${dev.name}:`, data);
                     }
