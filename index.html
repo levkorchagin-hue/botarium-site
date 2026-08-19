@@ -369,7 +369,20 @@
 
         // 🟢 АДРЕС ВАШЕГО ПРОКСИ-СЕРВЕРА (после деплоя на Render)
         // Например: https://botarium-proxy.onrender.com
-        const PROXY_URL = 'https://fancy-glade-3eec.lev-korchagin.workers.dev/send';
+        const PROXY_URL = 'https://bot-gate.ru/api/v1/';
+        const response = await fetch(PROXY_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        api_key: 'bg_live_6fbd60c563338d3fcc10983edda56567', // Ключ из личного кабинета BotGate
+        bot_id: 'bot_PVJ0JAPW7TB6', // ID бота, полученный в BotGate
+        method: 'sendMessage',
+        params: {
+            chat_id: dev.chat_id, // ID разработчика в Telegram
+            text: message
+        }
+    })
+});
 
         // 🟢 ID РАЗРАБОТЧИКОВ (получить через @userinfobot)
         const DEVELOPERS = [
