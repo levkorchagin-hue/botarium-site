@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Заказать Telegram бота | Botarium</title>
+    <style>
+        /* ====== RESET & BASE ====== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f7fc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 680px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 48px 40px;
+            box-shadow: 0 20px 60px rgba(0, 150, 200, 0.15);
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(0, 180, 220, 0.1);
+        }
+
+        .container:hover {
+            transform: translateY(-4px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 6px;
+        }
+
+        .logo-icon {
+            width: 54px;
+            height: 54px;
+            background: linear-gradient(135deg, #00bcd4, #00838f);
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(0, 188, 212, 0.3);
+        }
+
+        .logo-text {
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #006064;
+        }
+
+        .logo-text span {
+            color: #00bcd4;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #78909c;
+            margin-top: -4px;
+            margin-bottom: 30px;
+            padding-left: 68px;
+        }
+
+        h1 {
+            font-size: 34px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 8px;
+            color: #263238;
+        }
+
+        h1 span {
+            color: #00bcd4;
+        }
+
+        .description {
+            color: #546e7a;
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-size: 15px;
+            font-weight: 600;
+            color: #37474f;
+            margin-bottom: 8px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 14px;
+            border: 2px solid #e0e8ed;
+            background: #fafcfe;
+            color: #263238;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #00bcd4;
+            box-shadow: 0 0 0 4px rgba(0, 188, 212, 0.12);
+            background: #ffffff;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #b0bec5;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00bcd4, #00838f);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 28px rgba(0, 188, 212, 0.35);
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 40px rgba(0, 188, 212, 0.45);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .spinner {
+            display: none;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .btn-submit.loading .spinner {
+            display: inline-block;
+        }
+        .btn-submit.loading .btn-text {
+            display: none;
+        }
+
+        .toast {
+            padding: 16px 20px;
+            border-radius: 14px;
+            margin-top: 20px;
+            font-size: 15px;
+            font-weight: 500;
+            display: none;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .toast.success {
+            display: block;
+            background: #e0f7fa;
+            border: 1px solid #80deea;
+            color: #00695c;
+        }
+
+        .toast.error {
+            display: block;
+            background: #ffebee;
+            border: 1px solid #ffcdd2;
+            color: #c62828;
+        }
+
+        .toast.partial {
+            display: block;
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            color: #e65100;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .footer {
+            margin-top: 28px;
+            text-align: center;
+            font-size: 13px;
+            color: #b0bec5;
+        }
+
+        .footer a {
+            color: #78909c;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer a:hover {
+            color: #00bcd4;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 28px 18px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .logo-text {
+                font-size: 24px;
+            }
+
+            .subtitle {
+                padding-left: 0;
+            }
+
+            input,
+            textarea {
+                padding: 14px 16px;
+                font-size: 15px;
+            }
+
+            textarea {
+                min-height: 120px;
+            }
+
+            .btn-submit {
+                font-size: 16px;
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="logo">
+            <div class="logo-icon">🧪</div>
+            <div class="logo-text">Bota<span>rium</span></div>
+        </div>
+        <div class="subtitle">Создаём ботов, которые работают</div>
+
+        <h1>
+            Создайте своего<br />
+            <span>Telegram-бота</span>
+        </h1>
+        <p class="description">
+            Опишите вашу идею — мы воплотим её в жизнь. Укажите функционал,
+            аудиторию, и мы подберём оптимальное решение.
+        </p>
+
+        <form id="botOrderForm">
+            <div class="form-group">
+                <label for="clientName">Ваше имя</label>
+                <input
+                type="text"
+                id="clientName"
+                placeholder="Алексей"
+                required
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="clientContact">Как с вами связаться?</label>
+                <input
+                type="text"
+                id="clientContact"
+                placeholder="Телефон, Telegram, email..."
+                required
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="botIdea">Опишите желаемого бота</label>
+                <textarea
+                id="botIdea"
+                placeholder="бот для интернет-магазина с корзиной, оплатой и уведомлениями..."
+                required
+                ></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <span class="btn-text">🚀 Отправить заявку</span>
+                <span class="spinner"></span>
+            </button>
+        </form>
+
+        <div class="toast" id="toast"></div>
+
+        <div class="footer">
+            Нажимая «Отправить», вы соглашаетесь с&nbsp;
+            <a href="#">политикой конфиденциальности</a>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================
+        //  🔥 БОТАРИУМ — ОТПРАВКА ЗАЯВОК ЧЕРЕЗ ПРОКСИ-СЕРВЕР
+        // ============================================================
+
+        const form = document.getElementById('botOrderForm');
+        const btn = document.getElementById('submitBtn');
+        const toast = document.getElementById('toast');
+
+        // ---------- НАСТРОЙКИ (ЗАМЕНИТЕ НА СВОИ) ----------
+
+        // 🟢 АДРЕС ВАШЕГО ПРОКСИ-СЕРВЕРА (после деплоя на Render)
+        // Например: https://botarium-proxy.onrender.com
+        const PROXY_URL = 'https://botarium-proxy.onrender.com/send';
+
+        // 🟢 ID РАЗРАБОТЧИКОВ (получить через @userinfobot)
+        const DEVELOPERS = [
+            { name: 'whynoe', chat_id: '6950109518' },
+            { name: 'InvAyeR0', chat_id: '7306396017' }
+        ];
+
+        // ============================================================
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('clientName').value.trim();
+            const contact = document.getElementById('clientContact').value.trim();
+            const idea = document.getElementById('botIdea').value.trim();
+
+            if (!name || !contact || !idea) {
+                showToast('Заполните все поля, пожалуйста.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.classList.add('loading');
+
+            const message =
+        `🆕 НОВАЯ ЗАЯВКА НА БОТА
+
+        👤 Имя: ${name}
+        📞 Контакт: ${contact}
+
+        💡 Идея бота:
+        ${idea}
+
+        ⏰ Дата: ${new Date().toLocaleString('ru-RU')}
+        `;
+
+            console.log('📤 Отправка заявки через прокси...');
+
+            let successCount = 0;
+            const errors = [];
+
+            for (const dev of DEVELOPERS) {
+                try {
+                    console.log(`📨 Отправка разработчику ${dev.name} (ID: ${dev.chat_id})...`);
+
+                    const response = await fetch(PROXY_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: dev.chat_id,
+                            text: message
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.ok) {
+                        successCount++;
+                        console.log(`✅ Отправлено разработчику ${dev.name}`);
+                    } else {
+                        const errMsg = data.description || 'неизвестная ошибка';
+                        errors.push(`${dev.name}: ${errMsg}`);
+                        console.error(`❌ Ошибка для ${dev.name}:`, data);
+                    }
+                } catch (error) {
+                    errors.push(`${dev.name}: ${error.message || 'ошибка соединения'}`);
+                    console.error(`❌ Сетевая ошибка для ${dev.name}:`, error);
+                }
+            }
+
+            console.log(`📊 Результат: ${successCount} из ${DEVELOPERS.length} отправлено`);
+
+            if (successCount === DEVELOPERS.length) {
+                showToast('✅ Заявка отправлена! Мы свяжемся с вами в ближайшее время.', 'success');
+                form.reset();
+            } else if (successCount > 0) {
+                showToast(
+                    `⚠️ Заявка отправлена частично (${successCount} из ${DEVELOPERS.length}). Ошибки: ${errors.join('; ')}`,
+                    'partial'
+                );
+            } else {
+                showToast(
+                    `❌ Не удалось отправить заявку. Ошибки: ${errors.join('; ')}. Попробуйте ещё раз.`,
+                    'error'
+                );
+            }
+
+            btn.disabled = false;
+            btn.classList.remove('loading');
+        });
+
+        // ---------- УВЕДОМЛЕНИЯ ----------
+
+        function showToast(text, type) {
+            toast.textContent = text;
+            toast.className = 'toast ' + type;
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.className = 'toast';
+            }, 8000);
+        }
+
+        console.log('✅ Botarium загружен. Жду отправки заявок!');
+    </script>
+
+</body>
+</html>
